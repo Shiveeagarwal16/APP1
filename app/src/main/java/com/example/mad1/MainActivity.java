@@ -66,6 +66,6 @@ public class MainActivity extends AppCompatActivity {
             case "JPY": finalAmt = inr / 0.55; break;
         }
 
-        result.setText("Result: " + finalAmt);
+        result.setText(String.format("%.2f", finalAmt));
     }
 }
