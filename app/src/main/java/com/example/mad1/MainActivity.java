@@ -1,10 +1,11 @@
-package com.example.currencyconverter;
+package com.example.mad1;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,17 +16,36 @@ public class MainActivity extends AppCompatActivity {
 
     String[] currencies = {"INR", "USD", "EUR", "JPY"};
 
+    // Static conversion rates (for assignment)
+    double[][] rates = {
+            {1, 0.012, 0.011, 1.8},   // INR
+            {83, 1, 0.92, 150},       // USD
+            {90, 1.1, 1, 160},        // EUR
+            {0.55, 0.0067, 0.0062, 1} // JPY
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Apply saved theme
+        SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
+        boolean darkMode = prefs.getBoolean("dark", false);
+
+        if (darkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         setContentView(R.layout.activity_main);
 
         amount = findViewById(R.id.amount);
-        from = findViewById(R.id.from);
-        to = findViewById(R.id.to);
-        convert = findViewById(R.id.convert);
+        from = findViewById(R.id.fromCurrency);
+        to = findViewById(R.id.toCurrency);
+        convert = findViewById(R.id.convertBtn);
+        settings = findViewById(R.id.settingsBtn);
         result = findViewById(R.id.result);
-        settings = findViewById(R.id.settings);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, currencies);
@@ -33,39 +53,26 @@ public class MainActivity extends AppCompatActivity {
         from.setAdapter(adapter);
         to.setAdapter(adapter);
 
-        convert.setOnClickListener(v -> convertCurrency());
+        convert.setOnClickListener(v -> {
+            String amtStr = amount.getText().toString();
+
+            if (amtStr.isEmpty()) {
+                result.setText("Enter amount");
+                return;
+            }
+
+            double amt = Double.parseDouble(amtStr);
+
+            int fromIndex = from.getSelectedItemPosition();
+            int toIndex = to.getSelectedItemPosition();
+
+            double converted = amt * rates[fromIndex][toIndex];
+
+            result.setText("Result: " + converted + " " + currencies[toIndex]);
+        });
 
         settings.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         });
-    }
-
-    private void convertCurrency() {
-        double amt = Double.parseDouble(amount.getText().toString());
-
-        String fromCur = from.getSelectedItem().toString();
-        String toCur = to.getSelectedItem().toString();
-
-        double inr = 0;
-
-        // Convert to INR first
-        switch (fromCur) {
-            case "INR": inr = amt; break;
-            case "USD": inr = amt * 83; break;
-            case "EUR": inr = amt * 90; break;
-            case "JPY": inr = amt * 0.55; break;
-        }
-
-        double finalAmt = 0;
-
-        // Convert INR to target
-        switch (toCur) {
-            case "INR": finalAmt = inr; break;
-            case "USD": finalAmt = inr / 83; break;
-            case "EUR": finalAmt = inr / 90; break;
-            case "JPY": finalAmt = inr / 0.55; break;
-        }
-
-        result.setText(String.format("%.2f", finalAmt));
     }
 }

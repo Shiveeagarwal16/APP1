@@ -1,8 +1,3 @@
 <resources>
-    <color name="bg">#121212</color>
-    <color name="card">#1E1E1E</color>
-    <color name="primary">#7C4DFF</color>
-    <color name="accent">#00C2FF</color>
-    <color name="textPrimary">#FFFFFF</color>
-    <color name="textSecondary">#B0B0B0</color>
+    <color name="purple_500">#6200EE</color>
 </resources>
